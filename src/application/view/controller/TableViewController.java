@@ -15,13 +15,13 @@ import application.model.ReliabilityEntry;
 
 public class TableViewController {
 
-	TableView<ReliabilityEntry> reliabilityTableView;
-	TableView<CostEntry> costTableView;
-	TableView<PerformanceEntry> performanceTableView;
+	private TableView<ReliabilityEntry> reliabilityTableView;
+	private TableView<CostEntry> costTableView;
+	private TableView<PerformanceEntry> performanceTableView;
 
-	ObservableList<ReliabilityEntry> reliabilityData = FXCollections.observableArrayList();
-	ObservableList<CostEntry> costData = FXCollections.observableArrayList();
-	ObservableList<PerformanceEntry> performanceData = FXCollections.observableArrayList();
+	private ObservableList<ReliabilityEntry> reliabilityData = FXCollections.observableArrayList();
+	private ObservableList<CostEntry> costData = FXCollections.observableArrayList();
+	private ObservableList<PerformanceEntry> performanceData = FXCollections.observableArrayList();
 
 	
 	public TableViewController(TableView<ReliabilityEntry> reliabilityTableView,
@@ -84,16 +84,7 @@ public class TableViewController {
 		reliabilityTableView.getColumns().addAll(serviceColumn,invocationColumn,failColumn,failRateColumn,successRateColumn);
 	}
 	
-	/*
-	public void fillMockReliabilityDate(){
-		reliabilityData.addAll(new ReliabilityEntry("FASService0",100,98,2,0.02),
-	    new ReliabilityEntry("FASService1",100,99,1,0.01),
-	    new ReliabilityEntry("FASService2",100,90,10,0.1));
-	}*/
-	
 	public void fillReliabilityDate(String resultFilePath){
-		
-		//reliabilityData.clear();
 		
 		Map<String,ReliabilityEntry> reliabilityEntries=new HashMap<>();
 		try{
@@ -123,7 +114,6 @@ public class TableViewController {
 				if(!entry.getService().equals("AssistanceService"))
 					reliabilityData.add(entry);
 			}
-			//reliabilityData.add(new ReliabilityEntry());
 			reliabilityData.add(reliabilityEntries.get("AssistanceService"));
 		}
 		catch(Exception e){
@@ -203,26 +193,18 @@ public class TableViewController {
 	}
 	
 	public void fillCostData(String resultFilePath){
-		
-		//costData.clear();
-		
 		Map<String,CostEntry> costEntries=new HashMap<>();
-		//costEntries.put("Total", new CostEntry("Total"));
 		
 		try{
 			BufferedReader br = new BufferedReader(new FileReader(resultFilePath));
 			String line;
 			
-			//double totalCost=0;	
-			//int invocationNum=0;
-			//int currentInvocation=1;
 			String service;
 			boolean result;
 
 	        while ((line = br.readLine()) != null) {
 				String[] str=line.split(",");
 				if(str.length>=3){
-					//invocationNum=Integer.parseInt(str[0]);
 					service=str[1];
 					result=Boolean.parseBoolean(str[2]);
 					

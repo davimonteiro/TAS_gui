@@ -1,0 +1,31 @@
+START [travelerId,request]
+
+	// Declaration of some constants
+	searchFlight = 1
+	searchAttraction = 2
+	
+	rentCar = 1
+	rentBike = 2
+	
+	
+		if (request == searchFlight) {
+			FlightReservationService.searchFlight(travelerId)
+			result = HotelReservationService.searchHotel(travelerId)
+			
+			if (result == rentCar) {
+				CarRentalService.rentCar(travelerId)
+			} else if (result == rentBike) {
+				BicycleRentalService.rentBike(travelerId)
+			}
+			
+		} else if (request == searchAttraction) {
+			result = AttractionInformationService.searchAttraction(travelerId)
+			
+			if (result == rentCar) {
+				CarRentalService.rentCar(travelerId)
+			} else if (result == rentBike) {
+				BicycleRentalService.rentBike(travelerId)
+			}
+		}
+
+RETURN

@@ -1,5 +1,6 @@
 package application.view.controller;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -9,7 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import tas.services.log.*;
+import application.log.Log;
+import application.log.LogEntry;
 import application.log.Report;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -27,33 +29,32 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 
-import java.awt.Desktop;
-
 
 public class LogController implements Initializable{	
-	@FXML
-	TableView<LogEntry> logTableView;
 	
 	@FXML
-	TextField filterTextField;
+	private TableView<LogEntry> logTableView;
 	
 	@FXML
-	DatePicker fromDatePicker;
+	private TextField filterTextField;
 	
 	@FXML
-	DatePicker toDatePicker;
+	private DatePicker fromDatePicker;
 	
 	@FXML
-	Button clearButton;
+	private DatePicker toDatePicker;
 	
 	@FXML
-	Button reportButton;
+	private Button clearButton;
 	
-	Stage stage;
+	@FXML
+	private Button reportButton;
 	
-	FilteredList<LogEntry> filteredData = new FilteredList<>(Log.logData,p->true);
+	private Stage stage;
 	
-    private final String pattern = "yyyy-MM-dd";
+	private FilteredList<LogEntry> filteredData = new FilteredList<>(Log.logData,p->true);
+	
+    private final static String PATTERN = "yyyy-MM-dd";
 
 
 	@Override
@@ -133,7 +134,7 @@ public class LogController implements Initializable{
 	private void initializeDatePicker(){
         StringConverter<LocalDate> converter = new StringConverter<LocalDate>() {
             DateTimeFormatter dateFormatter = 
-                DateTimeFormatter.ofPattern(pattern);
+                DateTimeFormatter.ofPattern(PATTERN);
             @Override
             public String toString(LocalDate date) {
                 if (date != null) {
@@ -152,11 +153,11 @@ public class LogController implements Initializable{
             }
         };             
         fromDatePicker.setConverter(converter);
-        fromDatePicker.setPromptText(pattern.toLowerCase());
+        fromDatePicker.setPromptText(PATTERN.toLowerCase());
         //fromDatePicker.requestFocus();
         
         toDatePicker.setConverter(converter);
-        toDatePicker.setPromptText(pattern.toLowerCase());
+        toDatePicker.setPromptText(PATTERN.toLowerCase());
         //toDatePicker.requestFocus();
         
         
@@ -189,26 +190,10 @@ public class LogController implements Initializable{
                 if (newValue == null) {
                     return true;
                 }
-
-                
                 String date=log.getTime().split(" ")[0];
                 String fromDate=newValue.toString();
-          
-                /*
-                String values[]=date.split("-");
-                String compareValues[]=fromDate.split("-");
-                
-                if(Integer.parseInt(values[0])>=Integer.parseInt(compareValues[0])){
-                	if(Integer.parseInt(values[1])>=Integer.parseInt(compareValues[1])){
-                		if(Integer.parseInt(values[2])>=Integer.parseInt(compareValues[2]))
-                			return true;
-                	}
-                }*/
                 
                 return date.compareTo(fromDate)>=0 ;
-                	
-                
-                //return false;             
              });
 		});
 		
@@ -220,22 +205,8 @@ public class LogController implements Initializable{
 
                 String date=log.getTime().split(" ")[0];
                 String fromDate=newValue.toString();
-          
-                /*
-                String values[]=date.split("-");
-                String compareValues[]=fromDate.split("-");
-                
-                if(Integer.parseInt(values[0])<=Integer.parseInt(compareValues[0])){
-                	if(Integer.parseInt(values[1])<=Integer.parseInt(compareValues[1])){
-                		if(Integer.parseInt(values[2])<=Integer.parseInt(compareValues[2]))
-                			return true;
-                	}
-                }
-                
-                return false;  */
                 
                 return date.compareTo(fromDate)<=0 ;
-
              });
 		});
 		
@@ -281,17 +252,6 @@ public class LogController implements Initializable{
 		logTableView.getColumns().addAll(timeColumn,titleColumn,messageColumn);	
 		timeColumn.setSortType(TableColumn.SortType.DESCENDING);
 		logTableView.getSortOrder().add(timeColumn);
-		
-		/*
-		new Thread(new Runnable() { public void run() { 
-			while(true)
-				System.out.println(filteredData.size());
-		}}).start();*/
-		
-		//logTableView.requestFocus();
-		//logTableView.getSelectionModel().select(0);
-		//logTableView.getFocusModel().focus(0);		
 	}
-	
 
 }

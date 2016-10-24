@@ -10,6 +10,7 @@ import javafx.scene.shape.Polygon;
 public class ArrowNode {
 
     public static class LeftArrowNode extends Parent {
+    	
     	private AnchorPane pane;
     	private Label label;
     	private Line line;
@@ -65,8 +66,6 @@ public class ArrowNode {
             double polygonSize=-15.0;
 	        
         	line=new Line();
-        	//line.setStartX(layoutX);
-        	//line.setStartY(layoutY);
         	AnchorPane.setLeftAnchor(line, 0.0);
         	AnchorPane.setTopAnchor(line, 0.0);
         	
@@ -86,109 +85,16 @@ public class ArrowNode {
 	        polygon.setStroke(Color.BLACK);
         	AnchorPane.setLeftAnchor(polygon, length+polygonSize);
         	AnchorPane.setTopAnchor(polygon, polygonSize/2);
-	        //polygon.setLayoutX(layoutX+length-polygonSize);
-	        //polygon.setLayoutY(layoutY);
             pane.getChildren().add(polygon);
             
             label=new Label(name);
             double margin=15.0;
         	AnchorPane.setLeftAnchor(label, margin);
         	AnchorPane.setTopAnchor(label, margin*(-1));
-            //label.setLayoutX(layoutX+margin);
-            //label.setLayoutY(layoutY-margin);
             pane.getChildren().add(label);
             	      
             getChildren().addAll(pane);	
     	}
     }
-    
-    /*
-    public static class LeftDashArrowNode extends Parent{
-    	private AnchorPane pane;
-    	private Label label;
-    	private Line line;
-    	private Polygon polygon;
-    	
-    	public LeftDashArrowNode(double layoutX, double layoutY,String name,double length){
-    		pane=new AnchorPane();
-        	pane.setLayoutX(layoutX);
-        	pane.setLayoutY(layoutY);
-	        
-        	line=new Line();
-        	line.setStartX(layoutX);
-        	line.setStartY(layoutY);
-        	line.setEndX(layoutX-length);
-        	line.setEndY(layoutY);
-        	line.getStrokeDashArray().addAll(25d, 10d);
-            pane.getChildren().add(line);
-
-        	
-            double polygonSize=15.0;
-	        polygon = new Polygon(new double[]{
-	                0, 0,
-	                polygonSize,(polygonSize/2)*(-1),
-	                0,0,
-	                polygonSize,polygonSize/2,
-	                0,0
-	        }); 
-	        polygon.setStroke(Color.BLACK);
-	        polygon.setLayoutX(layoutX-length);
-	        polygon.setLayoutY(layoutY);
-            pane.getChildren().add(polygon);
-            
-            	            
-            label=new Label(name);
-            double margin=15.0;
-            label.setLayoutX(layoutX-length*2/3-margin);
-            label.setLayoutY(layoutY-margin);
-            pane.getChildren().add(label);
-            	      
-            getChildren().addAll(pane);	
-    	}
-    }
-    
-    public static class RightDashArrowNode extends Parent {
-    	private AnchorPane pane;
-    	private Label label;
-    	private Line line;
-    	private Polygon polygon;
-    	
-    	public RightDashArrowNode(double layoutX, double layoutY,String name,double length){
-    		pane=new AnchorPane();
-        	pane.setLayoutX(layoutX);
-        	pane.setLayoutY(layoutY);
-	        
-        	line=new Line();
-        	line.setStartX(layoutX);
-        	line.setStartY(layoutY);
-        	line.setEndX(layoutX+length);
-        	line.setEndY(layoutY);
-        	line.getStrokeDashArray().addAll(25d, 10d);
-            pane.getChildren().add(line);
-
-        	
-            double polygonSize=-15.0;
-	        polygon = new Polygon(new double[]{
-	                0, 0,
-	                polygonSize,polygonSize/2,
-	                0,0,
-	                polygonSize,(polygonSize/2)*(-1),
-	                0,0
-	        }); 
-	        polygon.setStroke(Color.BLACK);
-	        polygon.setLayoutX(layoutX+length);
-	        polygon.setLayoutY(layoutY);
-            pane.getChildren().add(polygon);
-                        	            
-            label=new Label(name);
-            double margin=15.0;
-            label.setLayoutX(layoutX+margin);
-            label.setLayoutY(layoutY-margin);
-            pane.getChildren().add(label);
-            	      
-            getChildren().addAll(pane);	
-    	}
-    }*/
-    
     
 }

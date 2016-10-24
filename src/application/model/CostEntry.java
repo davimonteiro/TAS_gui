@@ -8,28 +8,28 @@ import javafx.beans.property.SimpleStringProperty;
 
 public class CostEntry {
 
-    private SimpleStringProperty service;
-    private SimpleIntegerProperty invocationNum;
-    private SimpleDoubleProperty totalCost;
-    
-    public CostEntry(String service){
-    	this.service=new SimpleStringProperty(service);
-    	this.invocationNum=new SimpleIntegerProperty(0);
-    	this.totalCost=new SimpleDoubleProperty(0);
-    }
-    
-    public CostEntry(String service,int invocationNum, double totalCost){
-    	this.service=new SimpleStringProperty(service);
-    	this.invocationNum = new SimpleIntegerProperty(invocationNum);
-    	this.totalCost=new SimpleDoubleProperty(totalCost);
-    }
+	private SimpleStringProperty service;
+	private SimpleIntegerProperty invocationNum;
+	private SimpleDoubleProperty totalCost;
+
+	public CostEntry(String service) {
+		this.service = new SimpleStringProperty(service);
+		this.invocationNum = new SimpleIntegerProperty(0);
+		this.totalCost = new SimpleDoubleProperty(0);
+	}
+
+	public CostEntry(String service, int invocationNum, double totalCost) {
+		this.service = new SimpleStringProperty(service);
+		this.invocationNum = new SimpleIntegerProperty(invocationNum);
+		this.totalCost = new SimpleDoubleProperty(totalCost);
+	}
 
 	public String getService() {
 		return service.get();
 	}
 
 	public void setService(String service) {
-    	this.service=new SimpleStringProperty(service);
+		this.service = new SimpleStringProperty(service);
 	}
 
 	public int getInvocationNum() {
@@ -41,11 +41,11 @@ public class CostEntry {
 	}
 
 	public double getTotalCost() {
-	    return totalCost.get();
+		return totalCost.get();
 	}
 
 	public void setTotalCost(double totalCost) {
-	    BigDecimal bd = new  BigDecimal(totalCost); 
-	    this.totalCost=new SimpleDoubleProperty(bd.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
+		BigDecimal bd = new BigDecimal(totalCost);
+		this.totalCost = new SimpleDoubleProperty(bd.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
 	}
 }

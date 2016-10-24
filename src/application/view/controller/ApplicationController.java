@@ -2,12 +2,9 @@ package application.view.controller;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -24,20 +21,16 @@ import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
-import profile.ProfileExecutor;
-import service.composite.CompositeService;
-import service.registry.ServiceRegistry;
-import tas.services.assistance.AssistanceServiceCostProbe;
-import tas.configuration.TASConfiguration;
-import tas.configuration.TASStart;
 import application.MainGui;
-import application.Node.ArrowNode;
 import application.Node.ArrowNode.RightArrowNode;
 import application.Node.InstanceNode;
 import application.model.CostEntry;
 import application.model.PerformanceEntry;
 import application.model.ReliabilityEntry;
 import application.utility.FileManager;
+import br.uece.travelapp.TravelPlannerApp;
+import br.uece.travelapp.configuration.Configuration;
+import br.uece.travelapp.services.TravelPlannerServiceCostProbe;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -69,121 +62,122 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
+import profile.ProfileExecutor;
+import service.composite.CompositeService;
+import service.registry.ServiceRegistry;
 
 public class ApplicationController implements Initializable {
 
-	Stage primaryStage;
-	ChartController chartController;
-	TableViewController tableViewController;
+	private Stage primaryStage;
+	private ChartController chartController;
+	private TableViewController tableViewController;
 
-	String workflowPath = "resources" + File.separator + "TeleAssistanceWorkflow.txt";
-	String resultFilePath = "results" + File.separator + "result.csv";
-	String logFilePath = "results" + File.separator + "log.csv";
+	private String workflowPath = "resources" + File.separator + "TravelPlannerWorkflow.txt";
+	private String resultFilePath = "results" + File.separator + "result.csv";
+	private String logFilePath = "results" + File.separator + "log.csv";
 
-	ScheduledExecutorService scheduExec = Executors.newScheduledThreadPool(5);
+	private ScheduledExecutorService scheduExec = Executors.newScheduledThreadPool(5);
 
-	CompositeService compositeService;
-	AssistanceServiceCostProbe probe;
-	ServiceRegistry serviceRegistry;
-	TASStart tasStart;
+	private CompositeService compositeService;
+	private TravelPlannerServiceCostProbe probe;
+	private ServiceRegistry serviceRegistry;
+	private TravelPlannerApp travelPlannerApp;
 
-	Set<Button> profileRuns = new HashSet<>();
+	private Set<Button> profileRuns = new HashSet<>();
 
-	int maxSteps;
+	private int maxSteps;
 
-	Set<String> registeredServices = new HashSet<>();
-
-	@FXML
-	ListView<AnchorPane> serviceListView;
+	private Set<String> registeredServices = new HashSet<>();
 
 	@FXML
-	ListView<AnchorPane> profileListView;
+	private ListView<AnchorPane> serviceListView;
 
 	@FXML
-	TextArea workflowTextArea;
+	private ListView<AnchorPane> profileListView;
 
 	@FXML
-	TableView<ReliabilityEntry> reliabilityTableView;
+	private TextArea workflowTextArea;
 
 	@FXML
-	TableView<CostEntry> costTableView;
+	private TableView<ReliabilityEntry> reliabilityTableView;
 
 	@FXML
-	TableView<PerformanceEntry> performanceTableView;
+	private TableView<CostEntry> costTableView;
 
 	@FXML
-	MenuItem openWorkflowMenuItem;
+	private TableView<PerformanceEntry> performanceTableView;
 
 	@FXML
-	MenuItem openServicesMenuItem;
+	private MenuItem openWorkflowMenuItem;
 
 	@FXML
-	MenuItem configureMenuItem;
+	private MenuItem openServicesMenuItem;
 
 	@FXML
-	MenuItem openLogMenuItem;
+	private MenuItem configureMenuItem;
 
 	@FXML
-	MenuItem openProfileMenuItem;
+	private MenuItem openLogMenuItem;
 
 	@FXML
-	MenuItem saveRunMenuItem;
+	private MenuItem openProfileMenuItem;
 
 	@FXML
-	MenuItem saveLogMenuItem;
+	private MenuItem saveRunMenuItem;
 
 	@FXML
-	AnchorPane reliabilityChartPane;
+	private MenuItem saveLogMenuItem;
 
 	@FXML
-	AnchorPane costChartPane;
+	private AnchorPane reliabilityChartPane;
 
 	@FXML
-	AnchorPane performanceChartPane;
+	private AnchorPane costChartPane;
 
 	@FXML
-	ScrollPane serviceScrollPane;
+	private AnchorPane performanceChartPane;
 
 	@FXML
-	ScrollPane profileScrollPane;
+	private ScrollPane serviceScrollPane;
 
 	@FXML
-	MenuItem openRunMenuItem;
+	private ScrollPane profileScrollPane;
 
 	@FXML
-	Button aboutButton;
+	private MenuItem openRunMenuItem;
 
 	@FXML
-	MenuItem saveReliabilityGraphMenuItem;
+	private Button aboutButton;
 
 	@FXML
-	MenuItem saveCostGraphMenuItem;
+	private MenuItem saveReliabilityGraphMenuItem;
 
 	@FXML
-	MenuItem savePerformanceGraphMenuItem;
+	private MenuItem saveCostGraphMenuItem;
 
 	@FXML
-	MenuItem helpMenuItem;
+	private MenuItem savePerformanceGraphMenuItem;
 
 	@FXML
-	MenuItem exampleScenariosMenuItem;
+	private MenuItem helpMenuItem;
 
 	@FXML
-	ToolBar toolBar;
+	private MenuItem exampleScenariosMenuItem;
 
 	@FXML
-	Button configureButton;
+	private ToolBar toolBar;
 
 	@FXML
-	AnchorPane canvasPane;
+	private Button configureButton;
 
-	ProgressBar progressBar;
-	Label invocationLabel;
+	@FXML
+	private AnchorPane canvasPane;
 
-	Map<String, TASConfiguration> configurations;
+	private ProgressBar progressBar;
+	private Label invocationLabel;
+
+	private Map<String, Configuration> configurations;
 
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
@@ -257,13 +251,10 @@ public class ApplicationController implements Initializable {
 
 		while ((line = fileManager.readLine()) != null) {
 			if (line.contains(".")) {
-				// System.out.println(line);
 				String[] strs = line.split(" ");
 				for (int i = 0; i < strs.length; i++) {
 					if (strs[i].contains(".") && !strs[i].contains("this")) {
-						// System.out.println(strs[i]);
 						String[] values = strs[i].split("\\.");
-						// System.out.println(values.length);
 						String service = values[0].replaceAll("\\s*", "");
 						String operation = values[1].replaceAll("\\s*", "");
 
@@ -272,7 +263,6 @@ public class ApplicationController implements Initializable {
 							InstanceNode serviceNode = new InstanceNode(layoutX, initialY, service, instanceNodeLen);
 							canvasPane.getChildren().add(serviceNode);
 							instanceNodes.put(service, serviceNode);
-							// System.out.println(serviceNode.getX());
 						}
 
 						InstanceNode serviceNode = instanceNodes.get(service);
@@ -295,7 +285,7 @@ public class ApplicationController implements Initializable {
 		this.primaryStage = primaryStage;
 	}
 
-	public void setConfigurations(Map<String, TASConfiguration> configurations) {
+	public void setConfigurations(Map<String, Configuration> configurations) {
 		this.configurations = configurations;
 		this.addItems();
 	}
@@ -304,7 +294,7 @@ public class ApplicationController implements Initializable {
 		this.compositeService = service;
 	}
 
-	public void setProbe(AssistanceServiceCostProbe probe) {
+	public void setProbe(TravelPlannerServiceCostProbe probe) {
 		this.probe = probe;
 	}
 
@@ -313,8 +303,8 @@ public class ApplicationController implements Initializable {
 		openServicesMenuItem.fire();
 	}
 
-	public void setTasStart(TASStart tasStart) {
-		this.tasStart = tasStart;
+	public void setTasStart(TravelPlannerApp tasStart) {
+		this.travelPlannerApp = tasStart;
 	}
 
 	private void addItems() {
@@ -414,7 +404,6 @@ public class ApplicationController implements Initializable {
 
 				ConfigureController controller = (ConfigureController) loader.getController();
 				controller.setStage(dialogStage);
-				// controller.setService(tasStart.getService(serviceName));
 
 				Scene dialogScene = new Scene(configurePane);
 				dialogScene.getStylesheets().add(MainGui.class.getResource("view/application.css").toExternalForm());
@@ -440,7 +429,6 @@ public class ApplicationController implements Initializable {
 
 				ConfigureController controller = (ConfigureController) loader.getController();
 				controller.setStage(dialogStage);
-				// controller.setService(tasStart.getService(serviceName));
 
 				Scene dialogScene = new Scene(configurePane);
 				dialogScene.getStylesheets().add(MainGui.class.getResource("view/application.css").toExternalForm());
@@ -552,7 +540,7 @@ public class ApplicationController implements Initializable {
 						try {
 							SnapshotParameters param = new SnapshotParameters();
 							param.setDepthBuffer(true);
-							WritableImage snapshot = chartController.reliabilityChart.snapshot(param, null);
+							WritableImage snapshot = chartController.getReliabilityChart().snapshot(param, null);
 							BufferedImage tempImg = SwingFXUtils.fromFXImage(snapshot, null);
 
 							File outputfile = new File(file.getPath() + ".png");
@@ -580,7 +568,7 @@ public class ApplicationController implements Initializable {
 						try {
 							SnapshotParameters param = new SnapshotParameters();
 							param.setDepthBuffer(true);
-							WritableImage snapshot = chartController.costChart.snapshot(param, null);
+							WritableImage snapshot = chartController.getCostChart().snapshot(param, null);
 							BufferedImage tempImg = SwingFXUtils.fromFXImage(snapshot, null);
 
 							File outputfile = new File(file.getPath() + ".png");
@@ -606,7 +594,7 @@ public class ApplicationController implements Initializable {
 					try {
 						SnapshotParameters param = new SnapshotParameters();
 						param.setDepthBuffer(true);
-						WritableImage snapshot = chartController.performanceChart.snapshot(param, null);
+						WritableImage snapshot = chartController.getPerformanceChart().snapshot(param, null);
 						BufferedImage tempImg = SwingFXUtils.fromFXImage(snapshot, null);
 
 						File outputfile = new File(file.getPath() + ".png");
@@ -625,8 +613,6 @@ public class ApplicationController implements Initializable {
 			@Override
 			public void handle(ActionEvent event) {
 				try {
-					// System.out.println("about");
-
 					FXMLLoader loader = new FXMLLoader();
 					loader.setLocation(MainGui.class.getResource("view/aboutDialog.fxml"));
 					AnchorPane aboutPane = (AnchorPane) loader.load();
@@ -694,46 +680,6 @@ public class ApplicationController implements Initializable {
 			}
 		});
 
-		/*
-		 * exampleScenariosMenuItem.setOnAction(new EventHandler<ActionEvent>()
-		 * {
-		 * 
-		 * @Override public void handle(ActionEvent event) { try { FXMLLoader
-		 * loader = new FXMLLoader(); AnchorPane helpPane = null; if
-		 * (tasStart.getTasConfiguration() instanceof
-		 * TASConfigurationBasicScenarios){
-		 * loader.setLocation(MainGui.class.getResource(
-		 * "view/ExampleScenarios.fxml")); helpPane = (AnchorPane)
-		 * loader.load();
-		 * 
-		 * ExampleScenarios exampleScenarios =
-		 * (ExampleScenarios)loader.getController();
-		 * exampleScenarios.setScenario((TASConfigurationBasicScenarios)tasStart
-		 * .getTasConfiguration()); } else if(tasStart.getTasConfiguration()
-		 * instanceof TASConfigurationActivFORMS){
-		 * loader.setLocation(MainGui.class.getResource(
-		 * "view/ExampleScenariosActivFORMS.fxml")); helpPane = (AnchorPane)
-		 * loader.load();
-		 * 
-		 * ExampleScenariosActivFORMS exampleScenarios =
-		 * (ExampleScenariosActivFORMS)loader.getController();
-		 * exampleScenarios.setScenario((TASConfigurationActivFORMS)tasStart.
-		 * getTasConfiguration());
-		 * 
-		 * }
-		 * 
-		 * Stage dialogStage = new Stage();
-		 * dialogStage.setTitle("Example Scenarios");
-		 * 
-		 * Scene dialogScene = new Scene(helpPane);
-		 * dialogStage.initOwner(primaryStage);
-		 * dialogScene.getStylesheets().add(MainGui.class.getResource(
-		 * "view/application.css").toExternalForm());
-		 * 
-		 * 
-		 * dialogStage.setScene(dialogScene); dialogStage.show(); } catch
-		 * (Exception e) { e.printStackTrace(); } } });
-		 */
 	}
 
 	private void fillProfiles() {
@@ -743,7 +689,6 @@ public class ApplicationController implements Initializable {
 		try {
 			for (File file : files) {
 				if (file.isFile()) {
-					// System.out.println(file.getName());
 					if (file.getName().lastIndexOf('.') > 0)
 						this.addProfile(file.getAbsolutePath());
 				}
@@ -751,24 +696,18 @@ public class ApplicationController implements Initializable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		// this.addProfile("resources/files/inputProfile1.xml");
-		// this.addProfile("/inputProfile2.xml");
 	}
 
 	private void addProfile(String profilePath) {
 		final String path = profilePath;
 
 		AnchorPane itemPane = new AnchorPane();
-		// itemPane.setPrefHeight(40);
-		// itemPane.setMinHeight(40);
 
 		Button inspectButton = new Button();
 		inspectButton.setPrefWidth(32);
 		inspectButton.setPrefHeight(32);
 		inspectButton.setLayoutY(5);
 		inspectButton.setId("inspectButton");
-		// inspectButton.setStyle("-fx-background-image:
-		// url('resources/images/inspect.png');");
 
 		inspectButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
@@ -794,34 +733,12 @@ public class ApplicationController implements Initializable {
 					dialogStage.setScene(dialogScene);
 					dialogStage.show();
 
-					/*
-					 * final Stage dialog = new Stage();
-					 * dialog.initModality(Modality.APPLICATION_MODAL);
-					 * dialog.initOwner(primaryStage); final TextArea textArea =
-					 * new TextArea(); String content = new
-					 * String(Files.readAllBytes(Paths.get(path)));
-					 * textArea.setText(content); dialog.setOnCloseRequest(new
-					 * EventHandler<WindowEvent>() {
-					 * 
-					 * @Override public void handle(WindowEvent event) { String
-					 * newContent = textArea.getText(); try { PrintWriter out =
-					 * new PrintWriter(new BufferedWriter(new FileWriter(path,
-					 * false))); out.write(newContent); out.flush();
-					 * out.close(); } catch (IOException e) {
-					 * e.printStackTrace(); } } }); //
-					 * textArea.setEditable(false); Scene dialogScene = new
-					 * Scene(textArea, 800, 600); dialog.setScene(dialogScene);
-					 * dialog.show();
-					 */
-
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 
 			}
 		});
-
-		// profileInspects.put(inspectButton, profilePath);
 
 		Button runButton = new Button();
 		runButton.setPrefWidth(32);
@@ -831,13 +748,10 @@ public class ApplicationController implements Initializable {
 		profileRuns.add(runButton);
 		if (this.workflowPath == null)
 			runButton.setDisable(true);
-		// profileInspects.put(runButton, profilePath);
 
 		Label label = new Label();
 		label.setLayoutY(15);
 
-		// Paths.get(profilePath).getFileName();
-		// String[] strs=profilePath.split("/");
 		label.setText(Paths.get(profilePath).getFileName().toString().split("\\.")[0]);
 
 		final Circle circle = new Circle();
@@ -850,21 +764,6 @@ public class ApplicationController implements Initializable {
 			public void handle(ActionEvent event) {
 
 				if (runButton.getId().equals("runButton")) {
-					// System.out.println("start workflow");
-					// System.out.println("Run workflow with profile!!");
-
-					/*
-					 * if(tasStart.isPaused()){ tasStart.go();
-					 * 
-					 * Platform.runLater(new Runnable() {
-					 * 
-					 * @Override public void run() {
-					 * circle.setFill(Color.DARKRED);
-					 * runButton.setId("stopButton"); } }); }
-					 * 
-					 * else{
-					 */
-
 					probe.reset();
 
 					Task<Void> task = new Task<Void>() {
@@ -890,7 +789,7 @@ public class ApplicationController implements Initializable {
 
 								System.out.println("Before executing workflow!!");
 
-								tasStart.executeWorkflow(workflowPath, path);
+								travelPlannerApp.executeWorkflow(workflowPath, path);
 
 								System.out.println("Finish executing workflow!!");
 
@@ -902,10 +801,10 @@ public class ApplicationController implements Initializable {
 										chartController.clear();
 										tableViewController.clear();
 										chartController.generateReliabilityChart(resultFilePath,
-												tasStart.getCurrentSteps());
-										chartController.generateCostChart(resultFilePath, tasStart.getCurrentSteps());
+												travelPlannerApp.getCurrentSteps());
+										chartController.generateCostChart(resultFilePath, travelPlannerApp.getCurrentSteps());
 										chartController.generatePerformanceChart(resultFilePath,
-												tasStart.getCurrentSteps());
+												travelPlannerApp.getCurrentSteps());
 										tableViewController.fillReliabilityDate(resultFilePath);
 										tableViewController.fillCostData(resultFilePath);
 										tableViewController.fillPerformanceData(resultFilePath);
@@ -915,8 +814,6 @@ public class ApplicationController implements Initializable {
 							return null;
 						}
 					};
-
-					// System.out.println("Bind progress bar with task!!");
 
 					Thread thread = new Thread(task);
 					thread.setDaemon(true);
@@ -929,14 +826,12 @@ public class ApplicationController implements Initializable {
 						@Override
 						protected Void call() throws Exception {
 							while (probe.workflowInvocationCount < maxSteps) {
-								// System.out.println(probe.workflowInvocationCount);
 								Platform.runLater(new Runnable() {
 									@Override
 									public void run() {
 										invocationLabel.setText(" " + probe.workflowInvocationCount + " / " + maxSteps);
 									}
 								});
-								// invocationLabel.setText(""+probe.workflowInvocationCount);
 								updateProgress(probe.workflowInvocationCount, maxSteps);
 								Thread.sleep(1000);
 							}
@@ -953,10 +848,8 @@ public class ApplicationController implements Initializable {
 					progressBar.progressProperty().bind(progressTask.progressProperty());
 					new Thread(progressTask).start();
 				} else {
-
 					System.out.println("stop workflow");
-					tasStart.stop();
-					// tasStart.pause();
+					travelPlannerApp.stop();
 
 					Platform.runLater(new Runnable() {
 						@Override
@@ -965,9 +858,9 @@ public class ApplicationController implements Initializable {
 							runButton.setId("runButton");
 							chartController.clear();
 							tableViewController.clear();
-							chartController.generateReliabilityChart(resultFilePath, tasStart.getCurrentSteps());
-							chartController.generateCostChart(resultFilePath, tasStart.getCurrentSteps());
-							chartController.generatePerformanceChart(resultFilePath, tasStart.getCurrentSteps());
+							chartController.generateReliabilityChart(resultFilePath, travelPlannerApp.getCurrentSteps());
+							chartController.generateCostChart(resultFilePath, travelPlannerApp.getCurrentSteps());
+							chartController.generatePerformanceChart(resultFilePath, travelPlannerApp.getCurrentSteps());
 							tableViewController.fillReliabilityDate(resultFilePath);
 							tableViewController.fillCostData(resultFilePath);
 							tableViewController.fillPerformanceData(resultFilePath);
@@ -988,10 +881,7 @@ public class ApplicationController implements Initializable {
 	}
 
 	private void addService(String serviceName, boolean state) {
-
 		AnchorPane itemPane = new AnchorPane();
-		// itemPane.setPrefHeight(40);
-		// itemPane.setMinHeight(40);
 
 		Button inspectButton = new Button();
 		inspectButton.setPrefWidth(32);
@@ -1011,8 +901,8 @@ public class ApplicationController implements Initializable {
 
 				ServiceProfileController controller = (ServiceProfileController) loader.getController();
 				controller.setStage(dialogStage);
-				controller.setServiceProfileClasses(tasStart.getServiceProfileClasses());
-				controller.setService(tasStart.getService(serviceName));
+				controller.setServiceProfileClasses(travelPlannerApp.getServiceProfileClasses());
+				controller.setService(travelPlannerApp.getService(serviceName));
 
 				Scene dialogScene = new Scene(helpPane);
 				dialogScene.getStylesheets().add(MainGui.class.getResource("view/application.css").toExternalForm());
@@ -1047,34 +937,5 @@ public class ApplicationController implements Initializable {
 
 		serviceListView.getItems().add(itemPane);
 	}
-
-	/*
-	 * private void fillMockProfiles(String name, int length){ for(int
-	 * i=0;i<length;i++){ this.addProfile(name+"i"); } }
-	 * 
-	 * private void fillMockServices(String name, int length){
-	 * 
-	 * for(int i=0;i<length;i++){
-	 * 
-	 * AnchorPane itemPane=new AnchorPane(); itemPane.setPrefHeight(40);
-	 * itemPane.setMinHeight(40);
-	 * 
-	 * Button inspectButton=new Button(); inspectButton.setPrefWidth(32);
-	 * inspectButton.setPrefHeight(32); inspectButton.setLayoutY(5);
-	 * inspectButton.setId("inspectButton");
-	 * 
-	 * Label label=new Label(); label.setLayoutY(15); label.setText(name+i);
-	 * 
-	 * Circle circle = new Circle(); circle.setLayoutY(20);
-	 * circle.setFill(Color.GREEN); circle.setRadius(10);
-	 * 
-	 * AnchorPane.setLeftAnchor(circle, 10.0);
-	 * AnchorPane.setLeftAnchor(label,40.0);
-	 * AnchorPane.setRightAnchor(inspectButton, 10.0);
-	 * itemPane.getChildren().setAll(circle,label,inspectButton);
-	 * 
-	 * serviceVBox.getChildren().add(itemPane);
-	 * serviceVBox.getChildren().add(new Separator()); } }
-	 */
 
 }

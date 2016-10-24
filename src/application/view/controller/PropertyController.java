@@ -12,84 +12,74 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-public class PropertyController implements Initializable{
+public class PropertyController implements Initializable {
 
 	@FXML
-	TextField nameTextField;
-	
+	private TextField nameTextField;
+
 	@FXML
-	ChoiceBox<String> typeChoiceBox;
-	
+	private ChoiceBox<String> typeChoiceBox;
+
 	@FXML
-	TextField valueTextField;
-	
+	private TextField valueTextField;
+
 	@FXML
-	Button okButton;
-	
-	Stage stage;
-	
-	ServiceDescription description;
-	
-	private boolean isClicked=false;
-	
+	private Button okButton;
+
+	private Stage stage;
+
+	private ServiceDescription description;
+
+	private boolean isClicked = false;
+
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		typeChoiceBox.setItems(FXCollections.observableArrayList(
-				"boolean","Boolean", "short","Short",
-				"int", "Integer", "long", "Long", 
-				"float","Float", "double", "Double"
-			   )
-		);
+		typeChoiceBox.setItems(FXCollections.observableArrayList("boolean", "Boolean", "short", "Short", "int",
+				"Integer", "long", "Long", "float", "Float", "double", "Double"));
 		typeChoiceBox.getSelectionModel().select("double");
-		
-		okButton.setOnAction(event->{
-			if(!nameTextField.getText().isEmpty() && !valueTextField.getText().isEmpty()
-					&& !typeChoiceBox.getValue().isEmpty()){
-				
-				Object realValue=null;
-				String type=typeChoiceBox.getValue();
-				String value=valueTextField.getText();
-				String name=nameTextField.getText();
-				
+
+		okButton.setOnAction(event -> {
+			if (!nameTextField.getText().isEmpty() && !valueTextField.getText().isEmpty()
+					&& !typeChoiceBox.getValue().isEmpty()) {
+
+				Object realValue = null;
+				String type = typeChoiceBox.getValue();
+				String value = valueTextField.getText();
+				String name = nameTextField.getText();
+
 				try {
 					switch (type) {
-					case "boolean": 
-					case "Boolean":
-					{
+					case "boolean":
+					case "Boolean": {
 						if (value.equals("true"))
-							realValue= true;
+							realValue = true;
 						else
-							realValue= false;
+							realValue = false;
 						break;
 					}
 					case "short":
-					case "Short":
-					{
-						realValue= Short.parseShort(value);
+					case "Short": {
+						realValue = Short.parseShort(value);
 						break;
 					}
-					case "int": 
-					case "Integer": 
-					{
-						realValue= Integer.parseInt(value);
+					case "int":
+					case "Integer": {
+						realValue = Integer.parseInt(value);
 						break;
 					}
-					case "long": 
-					case "Long": 
-					{
-						realValue= Long.parseLong(value);
+					case "long":
+					case "Long": {
+						realValue = Long.parseLong(value);
 						break;
 					}
-					case "float": 
-					case "Float": 
-					{
-						realValue= Float.parseFloat(value);
+					case "float":
+					case "Float": {
+						realValue = Float.parseFloat(value);
 						break;
 					}
 					case "double":
-					case "Double": 
-					{
-						realValue= Double.parseDouble(value);
+					case "Double": {
+						realValue = Double.parseDouble(value);
 						break;
 					}
 					default: {
@@ -101,26 +91,26 @@ public class PropertyController implements Initializable{
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				
-				if(realValue!=null)
+
+				if (realValue != null)
 					description.getCustomProperties().put(name, realValue);
-				
+
 			}
-			isClicked=true;
+			isClicked = true;
 			stage.close();
 		});
 	}
-	
-	public boolean isClicked(){
+
+	public boolean isClicked() {
 		return this.isClicked;
 	}
-	
-	public void setStage(Stage stage){
-		this.stage=stage;
+
+	public void setStage(Stage stage) {
+		this.stage = stage;
 	}
-	
-	public void setServiceDescription(ServiceDescription description){
-		this.description=description;
+
+	public void setServiceDescription(ServiceDescription description) {
+		this.description = description;
 	}
 
 }
